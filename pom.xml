@@ -7,6 +7,44 @@
   <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
+  <url>https://github.com/rcarlosdasilva/cogen</url>
+  <developers>
+    <developer>
+      <email>rcarlosdasilva@qq.com</email>
+      <name>Dean Zhao</name>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+8</timezone>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:https://github.com/rcarlosdasilva/cogen.git</connection>
+    <developerConnection>scm:git:https://github.com/rcarlosdasilva/cogen.git</developerConnection>
+    <url>https://github.com/rcarlosdasilva/cogen</url>
+    <tag>v${project.version}</tag>
+  </scm>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <name>Maven Central Staging Repository</name>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jdk.version>1.8</jdk.version>
