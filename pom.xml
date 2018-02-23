@@ -7,6 +7,9 @@
   <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
+  <name>cogen</name>
+  <description>Code Generator - 使用模板，自动生成代码</description>
+
   <url>https://github.com/rcarlosdasilva/cogen</url>
   <developers>
     <developer>
