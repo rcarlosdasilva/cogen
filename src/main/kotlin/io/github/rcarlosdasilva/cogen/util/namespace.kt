@@ -43,12 +43,15 @@ object Files {
 
   private val logger = KotlinLogging.logger {}
 
-  fun write(content: String, path: String): Boolean {
+  fun write(content: String, path: String, coverage: Boolean): Boolean {
     val file = File(path)
     if (file.isDirectory) {
       return false
     }
 
+    if (file.exists() && !coverage) {
+      return false
+    }
     try {
       FileWriter(file).use { writer ->
         writer.write(content)
@@ -62,12 +65,12 @@ object Files {
   }
 
   fun path(vararg parts: String): String =
-    parts.filter { it.isNotBlank() }.map {
+    parts.filter { it.isNotBlank() }.joinToString("/") {
       val t = it.replace("..", "#")
         .replace('.', '/')
         .replace("#", "..")
       TextHelper.trim(t, "/")
-    }.joinToString { "/" }
+    }
 
 }
 

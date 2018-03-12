@@ -9,6 +9,7 @@ class TableModel(val name: String) {
 }
 
 class FieldModel(val name: String) {
+  var isIgnore: Boolean = false
   var isPrimaryKey: Boolean = false
   var comment: String? = null
   /**

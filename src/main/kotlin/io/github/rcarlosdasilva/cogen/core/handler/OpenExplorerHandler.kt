@@ -12,7 +12,7 @@ object OpenExplorerHandler : Handler {
 
   override fun handle() {
     with(Storage.configuration!!) {
-      if (isOpenExplorer) {
+      if (!isOpenExplorer) {
         return
       }
 

@@ -40,11 +40,16 @@ object TargetFilterHandler : Handler {
     if (name.isBlank() || !name.startsWith(prefix)) {
       return null
     }
-    if (tableConfig.includs?.contains(name) != true) {
-      return null
+
+    tableConfig.includes?.run {
+      if (!this.contains(name)) {
+        return null
+      }
     }
-    if (tableConfig.excluds?.contains(name) != true) {
-      return null
+    tableConfig.excludes?.run {
+      if (this.contains(name)) {
+        return null
+      }
     }
 
     val cut = if (tableConfig.isHoldTablePrefix) "" else tableConfig.prefix
@@ -54,7 +59,7 @@ object TargetFilterHandler : Handler {
     val results = Lists.newArrayList<FieldModel>()
 
     tableModel.fields?.forEach { model ->
-      fieldHits(model, tableConfig)?.also {
+      fieldHits(model, tableConfig).also {
         results.add(it)
       }
     }
@@ -62,33 +67,34 @@ object TargetFilterHandler : Handler {
 
     return tableModel
   }
+}
 
-  private fun fieldHits(fieldModel: FieldModel, table: Table): FieldModel? {
-    with(Storage.configuration!!.database!!) {
-      if (fieldModel.isPrimaryKey && isIgnoreId) {
-        return null
-      }
-      if (ignoreFields?.contains(fieldModel.name) == true) {
-        return null
-      }
-      if (table.ignoreFields?.contains(fieldModel.name) == true) {
-        return null
-      }
-      ignoreFieldsByPrefix?.firstOrNull {
-        fieldModel.name.startsWith(it)
-      }?.run { return@with }
-
-      fieldModel.javaName = if (table.isHoldFieldPrefix || table.fieldPrefixs?.isEmpty() == true) {
-        name(fieldModel.name, false)
-      } else {
-        table.fieldPrefixs?.firstOrNull {
-          fieldModel.name.startsWith(it)
-        }?.let {
-            name(fieldModel.name, it, false)
-          } ?: name(fieldModel.name, false)
-      }
-      fieldModel.javaType = dbTypeConverter.convert(fieldModel.type!!)
+private fun fieldHits(fieldModel: FieldModel, table: Table): FieldModel {
+  with(Storage.configuration!!.database!!) {
+    // 字段是否需要忽略，主键忽略规则1个，全局忽略规则2个，表内规则1个
+    val ignore = when {
+      fieldModel.isPrimaryKey && isIgnoreId -> true
+      ignoreFields != null && ignoreFields!!.contains(fieldModel.name) -> true
+      ignoreFieldsByPrefixes?.firstOrNull { fieldModel.name.startsWith(it) } != null -> true
+      table.ignoreFields != null && table.ignoreFields!!.contains(fieldModel.name) -> true
+      else -> false
     }
-    return fieldModel
+
+    if (ignore) {
+      fieldModel.isIgnore = ignore
+      return fieldModel
+    }
+
+    val cut = cutFieldPrefixes?.firstOrNull {
+      fieldModel.name.startsWith(it)
+    } ?: table.cutFieldPrefixes?.firstOrNull {
+      fieldModel.name.startsWith(it)
+    }
+    fieldModel.javaName = cut?.let {
+      name(fieldModel.name, it, false)
+    } ?: name(fieldModel.name, false)
+
+    fieldModel.javaType = dbTypeConverter.convert(fieldModel.type!!)
   }
+  return fieldModel
 }

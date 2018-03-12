@@ -75,14 +75,41 @@ object CodeGenerateHandler : Handler {
     val pck = Storage.configuration!!.entityPackage!!
     Storage.filteredTables?.forEach { tabModel ->
       val className = name(tabModel.javaName!!, pck.basicClass.prefix, pck.basicClass.suffix, true)
+      val imports = mutableListOf<String>()
 
       val clsModel = ClassModel(className)
-      clsModel.imports = tabModel.fields?.filter {
-        it.javaType != null && it.javaType?.fullName!!.contains(".")
-      }?.map { it.javaType?.fullName!! }?.distinct()?.toList() ?: listOf()
       clsModel.module = pck.module
       clsModel.pck = pck.name
       clsModel.table = tabModel
+      pck.basicClass.supers.run {
+        val fieldNames = tabModel.fields!!.map { it.name }.toList()
+        var sc: String? = null
+        var defaultSc: String? = null
+        for ((k, v) in this) {
+          if (fieldNames.contains(k)) {
+            sc = v
+            break
+          }
+          if (k.isBlank()) {
+            defaultSc = v
+          }
+        }
+        clsModel.superClass = if (sc == null) {
+          defaultSc
+        } else {
+          sc
+        }
+        if (clsModel.superClass != null) {
+          imports.add(clsModel.superClass!!)
+          clsModel.superClass = clsModel.superClass!!.split(".").last()
+        }
+      }
+
+      tabModel.fields = tabModel.fields!!.filter { !it.isIgnore }
+      imports.addAll(tabModel.fields?.filter {
+        it.javaType != null && it.javaType?.fullName!!.contains(".")
+      }?.map { it.javaType?.fullName!! }?.distinct()?.toMutableList() ?: mutableListOf())
+      clsModel.imports = imports
 
       val data = basicData()
       data["cls"] = clsModel
@@ -124,19 +151,21 @@ object CodeGenerateHandler : Handler {
       pck.name,
       className
     ) + (pck.basicClass.extension ?: Storage.configuration!!.lang.extension)
-    Files.write(content, path)
+    Files.write(content, path, Storage.configuration!!.isCoverage)
   }
 
   private fun basicData(): MutableMap<String, Any> {
     val data = Maps.newHashMap<String, Any>()
     with(Storage.configuration!!) {
-      data["author"] = authorName
+      data["authorName"] = authorName
       data["authorEmail"] = authorEmail
       if (isShowTime) {
         data["time"] = Date()
       }
-      data["version"] = version
-      data.putAll(extra)
+      if (version?.isNotBlank() == true) {
+        data["version"] = version
+      }
+      data.putAll(extras)
     }
     return data
   }

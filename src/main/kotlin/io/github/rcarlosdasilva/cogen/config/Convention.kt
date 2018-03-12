@@ -13,7 +13,7 @@ enum class NameStyle {
   STRIKE_CASE
 }
 
-enum class JavaType private constructor(val simpleName: String, val fullName: String) {
+enum class JavaType(val simpleName: String, val fullName: String) {
 
   BASE_INT("int", "int"),
   BASE_SHORT("short", "short"),

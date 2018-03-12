@@ -38,3 +38,5 @@ object Generator {
   }
 
 }
+
+// TODO 生成枚举类

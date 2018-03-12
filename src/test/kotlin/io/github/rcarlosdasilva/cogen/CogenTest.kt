@@ -36,14 +36,13 @@ class CogenTest {
 
     // 忽略公共字段
     database.ignoreFields = listOf("time_create", "time_update", "who_create", "who_update")
-    database.ignoreFieldsByPrefix = listOf("flag_delete", "flag_disable")
+    database.ignoreFieldsByPrefixes = listOf("flag_delete", "flag_disable")
 
     // 表配置
     val table1 = Table("core_")
-    table1.includs = listOf("core_menu")
+    table1.includes = listOf("core_menu")
     table1.isHoldTablePrefix = false
-    table1.isHoldFieldPrefix = false
-    table1.fieldPrefixs = listOf("flag_")
+    table1.cutFieldPrefixes = listOf("flag_")
 
     database.tables[table1.prefix] = table1
     //    database.table(new Table("mid_"));
@@ -107,10 +106,10 @@ class CogenTest {
     serviceCtlPackage.basicClass.suffix = "Service"
     configuration.packages.add(serviceCtlPackage)
 
-    configuration.extra["dtoPck"] = "com.yingxinhuitong.formicary.common.exposed.$module.bean"
-    configuration.extra["servicePck"] = "com.yingxinhuitong.formicary.service.$module.business.service"
-    configuration.extra["mapperPck"] = "com.yingxinhuitong.formicary.service.$module.storage.mysql.mapper"
-    configuration.extra["dubboServicePck"] = "com.yingxinhuitong.formicary.common.exposed.$module.service"
+    configuration.extras["dtoPck"] = "com.yingxinhuitong.formicary.common.exposed.$module.bean"
+    configuration.extras["servicePck"] = "com.yingxinhuitong.formicary.service.$module.business.service"
+    configuration.extras["mapperPck"] = "com.yingxinhuitong.formicary.service.$module.storage.mysql.mapper"
+    configuration.extras["dubboServicePck"] = "com.yingxinhuitong.formicary.common.exposed.$module.service"
     Generator.run(configuration)
   }
 
