@@ -50,10 +50,6 @@ class Configuration {
    */
   var version: String? = null
   /**
-   * java代码中类型是否使用原始类型
-   */
-  var isUsePrimitive = true
-  /**
    * 采用的语言
    */
   var lang = ClassType.JAVA
@@ -73,7 +69,7 @@ class Configuration {
   /**
    * 附加自定义参数，应用到mv模板中
    */
-  val extra: MutableMap<String, Any> by lazy { mutableMapOf<String, Any>() }
+  val extras: MutableMap<String, String> by lazy { mutableMapOf<String, String>() }
   /**
    * 执行完打开文件夹
    */
@@ -87,6 +83,9 @@ class Database(
   val password: String
 ) {
   var db = Db.MYSQL
+  /**
+   * 数据库与java类型转换，参数为true，使用原始类型
+   */
   var dbTypeConverter = MysqlTypeConverter()
   /**
    * 表中id的字段名
@@ -101,13 +100,17 @@ class Database(
    */
   val tables: MutableMap<String, Table> by lazy { mutableMapOf<String, Table>() }
   /**
-   * 全局表中需要忽略掉的字段
+   * 全局，表中需要忽略掉的字段
    */
   var ignoreFields: List<String>? = null
   /**
-   * 全局，需要忽略的字段前缀
+   * 全局，需要忽略的字段前缀，慎用
    */
-  var ignoreFieldsByPrefix: List<String>? = null
+  var ignoreFieldsByPrefixes: List<String>? = null
+  /**
+   * 全局，需要剪切掉的表字段的前缀，例如：字段flag_abc，生成的类中变量名为abc，则设置为flag_
+   */
+  var cutFieldPrefixes: List<String>? = null
 }
 
 /**
@@ -115,30 +118,26 @@ class Database(
  */
 class Table(val prefix: String) {
   /**
-   * 在指定的表前缀范围内，只包括哪些表（与excluds排斥，优先采用）.
+   * 在指定的表前缀范围内，只包括哪些表（与excludes排斥，优先采用）.
    *
-   * includs只需要表前缀后的名称，例如：表sys_user，includs只需要加入"user"字符串<br></br>
-   * 如果有多个单词，例如：表sys_user_and_admin，includs加入"user_and_admin"字符串
+   * includes只需要表前缀后的名称，例如：表sys_user，includes只需要加入"user"字符串<br></br>
+   * 如果有多个单词，例如：表sys_user_and_admin，includes加入"user_and_admin"字符串
    */
-  var includs: List<String>? = null
+  var includes: List<String>? = null
   /**
-   * 在指定的表前缀范围内，排除掉哪些表（与includs排斥）.
+   * 在指定的表前缀范围内，排除掉哪些表（与includes排斥）.
    *
-   * 参考includs
+   * 参考includes
    */
-  var excluds: List<String>? = null
+  var excludes: List<String>? = null
   /**
    * 生成的entity类名，是否保留表前缀（默认false）.
    */
   var isHoldTablePrefix = false
   /**
-   * 表字段的前缀，只有isHoldFieldPrefix为false时有效
+   * 同Database中的cutFieldPrefixes规则，范围为表配置
    */
-  var fieldPrefixs: List<String>? = null
-  /**
-   * 生成的entity类名，是否保留表字段前缀（默认false）.
-   */
-  var isHoldFieldPrefix = false
+  var cutFieldPrefixes: List<String>? = null
   /**
    * 表中需要忽略掉的字段
    */
@@ -176,6 +175,10 @@ class BasicClass {
    * 文件扩展名
    */
   var extension: String? = null
+  /**
+   * 超类，entity包，key为字段，value为超类名，即包含key字段的表生成的类，超类为对应的value。其他包也可使用类似的规则，如果无需区分，则不需要设置，在模板中不取${cls.superClass}即可
+   */
+  val supers: MutableMap<String, String> by lazy { linkedMapOf<String, String>() }
 }
 
 enum class ClassType(val extension: String) { JAVA(".java"), KOTLIN(".kt") }
